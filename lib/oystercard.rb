@@ -11,8 +11,11 @@ def top_up(amount)
   maximum_balance = MAXIMUM_BALANCE
   raise "Maximum balance of #{maximum_balance} reached" if @balance + amount > MAXIMUM_BALANCE
   @balance += amount
-
-
 end
 
+
+def deduct(amount)
+  @balance -= amount
 end
+
+end 
