@@ -18,32 +18,25 @@ let(:exit_station) { double :station}
  end
 end
 
-    describe '#in_journey?' do
-      it 'is not initially in journey' do
-        expect(subject).not_to be_in_journey
-      end
-    end
 
     describe '#touch_in' do
-      it 'starts a journey' do
-        subject.top_up(5)
-        subject.touch_in(entry_station)
-        expect(subject).to be_in_journey
+
+      it 'removes minimum fare on valid touch in/touch out do end' do
+         subject.top_up(10)
+         subject.touch_in(entry_station)
+         expect{subject.touch_out(exit_station)}.to change {subject.balance}.by(-Oystercard::MINIMUM_FARE)
       end
 
-      it 'remembers the entry station' do
-        subject.top_up(5)
-        subject.touch_in(entry_station)
-        expect(subject.current_journey[:entry]).to eq(entry_station)
+      it 'removes penalty fare on touch in/no touch out' do
+        subject.top_up(10)
+        expect{subject.touch_in(entry_station)}.to change {subject.balance}.by(-Oystercard::PENALTY_FARE)
+
       end
+      it 'removes penalty fare on touch out/no touch in' do
+        subject.top_up(10)
+        expect{subject.touch_out(exit_station)}.to change {subject.balance}.by(-Oystercard::PENALTY_FARE)
 
-      it 'adds entry station for a journey' do
-        subject.top_up(5)
-        subject.touch_in(entry_station)
-        expect(subject.current_journey[:entry]).to eq(entry_station)
       end
-
-
 
       context 'when there are insufficient funds' do
       it "raise an error" do
@@ -53,20 +46,6 @@ end
     end
 
     describe '#touch_out' do
-      it 'ends a journey' do
-        subject.top_up(5)
-        subject.touch_in(entry_station)
-        subject.touch_out(exit_station)
-      expect(subject).not_to be_in_journey
-      end
-
-      # it 'forgets the entry station' do
-      #   subject.top_up(5)
-      #   subject.touch_in(entry_station)
-      #   subject.touch_out(exit_station)
-      #   expect(subject.current_journey).to eq {}
-      # end
-
 
    it "charges minimum fare on touching out" do
    subject.top_up(5)
@@ -77,18 +56,26 @@ end
    it {is_expected.to respond_to(:touch_out).with(1).argument}
    end
 
-   it 'adds adds exit station for a journey' do
-     subject.top_up(5)
-     subject.touch_in(entry_station)
-     subject.touch_out(exit_station)
-     expect(subject.current_journey[:exit]).to eq(exit_station)
-   end
-
-
-
    describe "#list_journeys" do
      it "lists all previous journeys" do
        expect(subject.list_journeys).to eq []
      end
+   end
+
+   it 'tests journey writing' do
+     subject.top_up(5)
+     subject.touch_in(entry_station)
+     subject.touch_out(exit_station)
+     expect(subject.list_journeys).to eq [{:entry=>entry_station, :exit=>exit_station}]
+   end
+   # it 'tests journey writing if touch in/no touch out' do
+   #   subject.top_up(5)
+   #   subject.touch_in(entry_station)
+   #   expect(subject.list_journeys).to eq [{:entry=>entry_station, :exit=>nil}]
+   # end
+   it 'tests journey writingif touch out/no touch in' do
+     subject.top_up(5)
+     subject.touch_out(exit_station)
+     expect(subject.list_journeys).to eq [{:entry=>nil, :exit=>exit_station}]
    end
 end

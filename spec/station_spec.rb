@@ -14,9 +14,4 @@ RSpec.describe Station do
     end
   end
 
-
-  # it {is_expected.to respond_to(:name)}
-  # it {is_expected.to respond_to(:zone)}
-
-
 end
