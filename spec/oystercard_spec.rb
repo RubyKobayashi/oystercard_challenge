@@ -1,7 +1,8 @@
 require 'oystercard'
 
 RSpec.describe Oystercard do
-let(:station) { double :station }
+let(:entry_station) { double :station }
+let(:exit_station) { double :station}
 
   describe '#top-up' do
     it 'tops up the balance' do
@@ -26,19 +27,27 @@ end
     describe '#touch_in' do
       it 'starts a journey' do
         subject.top_up(5)
-        subject.touch_in(station)
+        subject.touch_in(entry_station)
         expect(subject).to be_in_journey
       end
 
       it 'remembers the entry station' do
         subject.top_up(5)
-        subject.touch_in(station)
-        expect(subject.entry_station).to eq(station)
+        subject.touch_in(entry_station)
+        expect(subject.current_journey[:entry]).to eq(entry_station)
       end
+
+      it 'adds entry station for a journey' do
+        subject.top_up(5)
+        subject.touch_in(entry_station)
+        expect(subject.current_journey[:entry]).to eq(entry_station)
+      end
+
+
 
       context 'when there are insufficient funds' do
       it "raise an error" do
-      expect{subject.touch_in(station)}.to raise_error "insufficient funds"
+      expect{subject.touch_in(entry_station)}.to raise_error "insufficient funds"
     end
     end
     end
@@ -46,23 +55,40 @@ end
     describe '#touch_out' do
       it 'ends a journey' do
         subject.top_up(5)
-        subject.touch_in(station)
-        subject.touch_out
+        subject.touch_in(entry_station)
+        subject.touch_out(exit_station)
       expect(subject).not_to be_in_journey
       end
 
-      it 'forgets the entry station' do
-        subject.top_up(5)
-        subject.touch_in(station)
-        subject.touch_out
-        expect(subject.entry_station).to eq nil
-      end
+      # it 'forgets the entry station' do
+      #   subject.top_up(5)
+      #   subject.touch_in(entry_station)
+      #   subject.touch_out(exit_station)
+      #   expect(subject.current_journey).to eq {}
+      # end
 
 
    it "charges minimum fare on touching out" do
    subject.top_up(5)
-   subject.touch_in(station)
-   expect {subject.touch_out}.to change{subject.balance}.by(-Oystercard::MINIMUM_FARE)
+   subject.touch_in(entry_station)
+   expect {subject.touch_out(exit_station)}.to change{subject.balance}.by(-Oystercard::MINIMUM_FARE)
    end
+
+   it {is_expected.to respond_to(:touch_out).with(1).argument}
+   end
+
+   it 'adds adds exit station for a journey' do
+     subject.top_up(5)
+     subject.touch_in(entry_station)
+     subject.touch_out(exit_station)
+     expect(subject.current_journey[:exit]).to eq(exit_station)
+   end
+
+
+
+   describe "#list_journeys" do
+     it "lists all previous journeys" do
+       expect(subject.list_journeys).to eq []
+     end
    end
 end
