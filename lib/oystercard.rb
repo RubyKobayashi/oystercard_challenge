@@ -10,7 +10,6 @@ PENALTY_FARE = 6
 
   def initialize
    @balance = 0
-   @list_journeys = []
    @journey = Journey.new
   end
 
@@ -28,16 +27,20 @@ PENALTY_FARE = 6
 
   def touch_in(station)
     fail "insufficient funds" if @balance < MINIMUM_BALANCE
-
-    deduct(@journey.fare)
-    @journey = Journey.new
-    @journey.start_journey(station)
+    begin
+      @journey.start_journey(station)
+    # deduct(@journey.fare)
+    # @journey = Journey.new
+  rescue
+    deduct(PENALTY_FARE)
   end
 
   def touch_out(station)
      @journey.end_journey(station)
-     @list_journeys << @journey.current_journey
-     deduct(@journey.fare)
+      deduct(@journey.fare)
+    rescue
+      deduct(PENALTY_FARE)
   end
 
 end
+end 

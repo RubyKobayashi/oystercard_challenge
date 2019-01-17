@@ -29,6 +29,7 @@ end
 
       it 'removes penalty fare on touch in/no touch out' do
         subject.top_up(10)
+        subject.touch_in(entry_station)
         expect{subject.touch_in(entry_station)}.to change {subject.balance}.by(-Oystercard::PENALTY_FARE)
 
       end
@@ -56,26 +57,8 @@ end
    it {is_expected.to respond_to(:touch_out).with(1).argument}
    end
 
-   describe "#list_journeys" do
-     it "lists all previous journeys" do
-       expect(subject.list_journeys).to eq []
-     end
-   end
 
-   it 'tests journey writing' do
-     subject.top_up(5)
-     subject.touch_in(entry_station)
-     subject.touch_out(exit_station)
-     expect(subject.list_journeys).to eq [{:entry=>entry_station, :exit=>exit_station}]
-   end
-   # it 'tests journey writing if touch in/no touch out' do
-   #   subject.top_up(5)
-   #   subject.touch_in(entry_station)
-   #   expect(subject.list_journeys).to eq [{:entry=>entry_station, :exit=>nil}]
-   # end
-   it 'tests journey writingif touch out/no touch in' do
-     subject.top_up(5)
-     subject.touch_out(exit_station)
-     expect(subject.list_journeys).to eq [{:entry=>nil, :exit=>exit_station}]
-   end
+
+
+
 end

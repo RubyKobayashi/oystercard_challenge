@@ -6,7 +6,7 @@ RSpec.describe Journey do
 
   it 'remembers the entry station' do
     subject.start_journey(entry_station)
-    expect(subject.current_journey[:entry]).to eq(entry_station)
+    expect(subject.entry_station).to eq(entry_station)
   end
 
   # describe '#in_journey?' do
@@ -16,9 +16,11 @@ RSpec.describe Journey do
   # end
 
   it 'remembers the exit station' do
+    subject.start_journey(entry_station)
     subject.end_journey(exit_station)
-    expect(subject.current_journey[:exit]).to eq(exit_station)
+    expect(subject.list_journeys[0][:exit]).to eq(exit_station)
   end
+
 
   it "returns minimum fare" do
     subject.start_journey(entry_station)
@@ -28,11 +30,19 @@ RSpec.describe Journey do
 
   it "if only touched in" do
     subject.start_journey(entry_station)
-    expect(subject.fare).to eq Oystercard::PENALTY_FARE
+    expect{subject.start_journey(entry_station)}.to raise_error "You didnt touch out"
   end
 
   it "if only touched out" do
-    subject.end_journey(exit_station)
-    expect(subject.fare).to eq Oystercard::PENALTY_FARE
+    expect{subject.end_journey(exit_station)}.to raise_error "You didnt touch in"
   end
+
+  describe "#list_journeys" do
+    it "lists all previous journeys" do
+      subject.start_journey(entry_station)
+      subject.end_journey(exit_station)
+      expect(subject.list_journeys).to eq [entry: entry_station, exit: exit_station]
+    end
+  end
+
 end
