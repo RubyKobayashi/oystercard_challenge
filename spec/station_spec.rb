@@ -1,7 +1,7 @@
 require 'station'
 
 RSpec.describe Station do
-  subject {described_class.new("Aldgate East", 2 )}
+  subject { described_class.new("Aldgate East", 2) }
 
   describe 'name' do
     it "is expected to return the name of the station" do
